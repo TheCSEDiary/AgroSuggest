@@ -7,12 +7,10 @@ import Catalogue from './components/Catalogue'
 
 function AppContent() {
   const { user, loading, signOut } = useAuth()
-  
-  // This state remembers which tab the user clicked
   const [activeTab, setActiveTab] = useState('recommend')
 
   if (loading) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>Loading AgroSuggest...</div>
+    return <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'sans-serif' }}>Loading... TESTING 123</div>
   }
 
   if (!user) {
@@ -20,79 +18,87 @@ function AppContent() {
   }
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', background: '#fafaf7', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
       
-      {/* --- HEADER --- */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1 style={{ color: '#2d5016', fontSize: '24px', margin: 0 }}>AgroSuggest 🌾</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '14px', color: '#555' }}>{user.email}</span>
+      {/* --- NAVBAR --- */}
+      <nav style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        padding: '16px 40px', 
+        background: 'white',
+        borderBottom: '1px solid #eee'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ 
+            width: '40px', 
+            height: '40px', 
+            background: '#2d5016', 
+            borderRadius: '50%', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            color: 'white',
+            fontSize: '20px'
+          }}>
+            🌱
+          </div>
+          <span style={{ fontWeight: '600', fontSize: '18px', color: '#1a1a1a' }}>Karnataka Crop Advisor</span>
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <NavButton active={activeTab === 'recommend'} onClick={() => setActiveTab('recommend')}>Recommend</NavButton>
+          <NavButton active={activeTab === 'catalogue'} onClick={() => setActiveTab('catalogue')}>Crops</NavButton>
+          <NavButton active={activeTab === 'past'} onClick={() => setActiveTab('past')}>My lookups</NavButton>
           <button 
-            onClick={signOut} 
-            style={{ padding: '8px 16px', background: '#c0392b', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px' }}
+            onClick={signOut}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '6px',
+              background: 'none', 
+              border: 'none', 
+              color: '#666', 
+              cursor: 'pointer', 
+              padding: '10px 16px',
+              fontSize: '15px',
+              fontWeight: '500'
+            }}
           >
-            Log Out
+            <span style={{ fontSize: '18px' }}>↪</span> Sign out
           </button>
         </div>
-      </header>
+      </nav>
 
-      {/* --- NAVIGATION TABS --- */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '2px solid #eee', paddingBottom: '10px', flexWrap: 'wrap' }}>
-        <button 
-          onClick={() => setActiveTab('recommend')}
-          style={{ 
-            padding: '10px 16px', 
-            background: activeTab === 'recommend' ? '#2d5016' : '#f0f0f0', 
-            color: activeTab === 'recommend' ? 'white' : '#333', 
-            border: 'none', 
-            borderRadius: '8px 8px 0 0', 
-            cursor: 'pointer', 
-            fontWeight: 'bold',
-            fontSize: '15px'
-          }}
-        >
-          🌱 Recommend
-        </button>
-        <button 
-          onClick={() => setActiveTab('past')}
-          style={{ 
-            padding: '10px 16px', 
-            background: activeTab === 'past' ? '#2d5016' : '#f0f0f0', 
-            color: activeTab === 'past' ? 'white' : '#333', 
-            border: 'none', 
-            borderRadius: '8px 8px 0 0', 
-            cursor: 'pointer', 
-            fontWeight: 'bold',
-            fontSize: '15px'
-          }}
-        >
-          📂 My Lookups
-        </button>
-        <button 
-          onClick={() => setActiveTab('catalogue')}
-          style={{ 
-            padding: '10px 16px', 
-            background: activeTab === 'catalogue' ? '#2d5016' : '#f0f0f0', 
-            color: activeTab === 'catalogue' ? 'white' : '#333', 
-            border: 'none', 
-            borderRadius: '8px 8px 0 0', 
-            cursor: 'pointer', 
-            fontWeight: 'bold',
-            fontSize: '15px'
-          }}
-        >
-          📚 Catalogue
-        </button>
-      </div>
-
-      {/* --- MAIN CONTENT AREA --- */}
-      <main>
+      {/* --- MAIN CONTENT --- */}
+      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
         {activeTab === 'recommend' && <RecommendForm />}
-        {activeTab === 'past' && <PastLookups />}
         {activeTab === 'catalogue' && <Catalogue />}
+        {activeTab === 'past' && <PastLookups />}
       </main>
 
     </div>
+  )
+}
+
+function NavButton({ active, onClick, children }) {
+  return (
+    <button 
+      onClick={onClick}
+      style={{ 
+        background: 'none', 
+        border: 'none', 
+        color: active ? '#2d5016' : '#666', 
+        cursor: 'pointer', 
+        padding: '10px 16px',
+        fontSize: '15px',
+        fontWeight: active ? '600' : '500',
+        borderBottom: active ? '2px solid #2d5016' : '2px solid transparent',
+        transition: 'all 0.2s'
+      }}
+    >
+      {children}
+    </button>
   )
 }
 

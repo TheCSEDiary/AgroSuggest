@@ -19,6 +19,15 @@ const crops = [
   { id: 'mustard', name: 'Mustard', soils: ['loamy', 'red', 'sandy'], seasons: ['rabi'], rainfall: ['low', 'medium'], water: ['rainfed only', 'limited irrigation'], details: { sowingWindow: 'October to November', waterNeeds: 'Low to Medium', duration: '110 to 130 days', tips: 'Light irrigation at branching boosts seed yield.' } }
 ]
 
+const soilOptions = ['sandy', 'loamy', 'clay', 'black', 'red', 'laterite']
+const seasonOptions = [
+  { value: 'kharif', label: 'Kharif (June – October)' },
+  { value: 'rabi', label: 'Rabi (October – February)' },
+  { value: 'summer', label: 'Summer (February – May)' }
+]
+const rainfallOptions = ['low', 'medium', 'high']
+const waterOptions = ['rainfed only', 'limited irrigation', 'good irrigation']
+
 export default function RecommendForm() {
   const [inputs, setInputs] = useState({ soil: '', season: '', rainfall: '', water: '' })
   const [results, setResults] = useState([])
@@ -27,12 +36,11 @@ export default function RecommendForm() {
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
 
-  const handleChange = (e) => {
-    setInputs({ ...inputs, [e.target.name]: e.target.value })
+  const handleChange = (field, value) => {
+    setInputs({ ...inputs, [field]: value })
   }
 
-  const handleRecommend = (e) => {
-    e.preventDefault()
+  const handleRecommend = () => {
     if (!inputs.soil || !inputs.season || !inputs.rainfall || !inputs.water) {
       alert('Please fill in all fields to get a recommendation.')
       return
@@ -49,7 +57,6 @@ export default function RecommendForm() {
     setSaving(true)
     setSaveMsg('')
     
-    // Save the inputs and the top recommended crop name
     const { error } = await supabase.from('saved_lookups').insert({
       inputs: inputs,
       top_crop: results[0].name 
@@ -65,85 +72,317 @@ export default function RecommendForm() {
   }
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '10px' }}>
-      <div style={{ background: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', marginBottom: '20px' }}>
-        <h2 style={{ color: '#2d5016', marginBottom: '15px', fontSize: '20px' }}>Tell us about your field</h2>
-        <form onSubmit={handleRecommend}>
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold', fontSize: '14px' }}>Soil Type</label>
-            <select name="soil" value={inputs.soil} onChange={handleChange} required style={selectStyle}>
-              <option value="">Select soil type</option>
-              <option value="sandy">Sandy</option><option value="loamy">Loamy</option><option value="clay">Clay</option>
-              <option value="black">Black</option><option value="red">Red</option><option value="laterite">Laterite</option>
-            </select>
-          </div>
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold', fontSize: '14px' }}>Season</label>
-            <select name="season" value={inputs.season} onChange={handleChange} required style={selectStyle}>
-              <option value="">Select season</option>
-              <option value="kharif">Kharif (Monsoon)</option><option value="rabi">Rabi (Winter)</option><option value="summer">Summer</option>
-            </select>
-          </div>
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold', fontSize: '14px' }}>Rainfall Level</label>
-            <select name="rainfall" value={inputs.rainfall} onChange={handleChange} required style={selectStyle}>
-              <option value="">Select rainfall</option>
-              <option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option>
-            </select>
-          </div>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontWeight: 'bold', fontSize: '14px' }}>Water Availability</label>
-            <select name="water" value={inputs.water} onChange={handleChange} required style={selectStyle}>
-              <option value="">Select water availability</option>
-              <option value="rainfed only">Rainfed only</option><option value="limited irrigation">Limited irrigation</option><option value="good irrigation">Good irrigation</option>
-            </select>
-          </div>
-          <button type="submit" style={buttonStyle}>Get Recommendations</button>
-        </form>
+    <div>
+            {/* --- HERO SECTION --- */}
+      <div style={{ marginBottom: '40px' }}>
+        <p style={{ 
+          color: '#059669', 
+          fontSize: '13px', 
+          fontWeight: '700', 
+          letterSpacing: '1.5px', 
+          marginBottom: '16px',
+          textTransform: 'uppercase',
+          margin: 0
+        }}>
+          FOR FARMERS IN INDIA
+        </p>
+        
+        <h1 style={{ 
+          fontSize: '52px', 
+          fontWeight: '700', 
+          color: '#111827', 
+          lineHeight: '1.1', 
+          margin: '0 0 10px 0',
+          fontFamily: 'system-ui, -apple-system, sans-serif'
+        }}>
+          Tell us about your field.
+        </h1>
+        
+        <h1 style={{ 
+          fontSize: '52px', 
+          fontWeight: '700', 
+          color: '#065f46', 
+          lineHeight: '1.1', 
+          margin: '0 0 24px 0',
+          fontFamily: 'system-ui, -apple-system, sans-serif'
+        }}>
+          We'll tell you what to sow.
+        </h1>
+        
+        <p style={{ 
+          fontSize: '18px', 
+          color: '#4b5563', 
+          maxWidth: '600px', 
+          lineHeight: '1.6', 
+          margin: 0 
+        }}>
+          Four simple questions about your soil, season, rainfall and water. We compare them with the major crops grown across Karnataka and rank the ones that fit best.
+        </p>
       </div>
 
+      {/* --- TWO COLUMN LAYOUT --- */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '30px', alignItems: 'start' }}>
+        
+        {/* LEFT: FORM */}
+        <div style={{ 
+          background: 'white', 
+          padding: '32px', 
+          borderRadius: '16px', 
+          border: '1px solid #eee',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+        }}>
+          
+          {/* Soil Type */}
+          <SectionTitle>SOIL TYPE</SectionTitle>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '28px' }}>
+            {soilOptions.map(soil => (
+              <OptionButton 
+                key={soil} 
+                selected={inputs.soil === soil} 
+                onClick={() => handleChange('soil', soil)}
+              >
+                {soil.charAt(0).toUpperCase() + soil.slice(1)}
+              </OptionButton>
+            ))}
+          </div>
+
+          {/* Season */}
+          <SectionTitle>SEASON</SectionTitle>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '28px' }}>
+            {seasonOptions.map(season => (
+              <OptionButton 
+                key={season.value} 
+                selected={inputs.season === season.value} 
+                onClick={() => handleChange('season', season.value)}
+              >
+                {season.label}
+              </OptionButton>
+            ))}
+          </div>
+
+          {/* Rainfall */}
+          <SectionTitle>RAINFALL</SectionTitle>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '28px' }}>
+            {rainfallOptions.map(r => (
+              <OptionButton 
+                key={r} 
+                selected={inputs.rainfall === r} 
+                onClick={() => handleChange('rainfall', r)}
+              >
+                {r.charAt(0).toUpperCase() + r.slice(1)}
+              </OptionButton>
+            ))}
+          </div>
+
+          {/* Water */}
+          <SectionTitle>WATER AVAILABILITY</SectionTitle>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '28px' }}>
+            {waterOptions.map(w => (
+              <OptionButton 
+                key={w} 
+                selected={inputs.water === w} 
+                onClick={() => handleChange('water', w)}
+              >
+                {w.charAt(0).toUpperCase() + w.slice(1)}
+              </OptionButton>
+            ))}
+          </div>
+
+          <button 
+            onClick={handleRecommend}
+            style={{ 
+              width: '100%', 
+              padding: '16px', 
+              background: '#2d5016', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '10px', 
+              fontSize: '16px', 
+              fontWeight: '600', 
+              cursor: 'pointer',
+              transition: 'background 0.2s'
+            }}
+          >
+            Get Recommendations
+          </button>
+        </div>
+
+        {/* RIGHT: INFO CARD */}
+        <div style={{ 
+          background: '#f5f3ef', 
+          padding: '28px', 
+          borderRadius: '16px',
+          border: '1px solid #e8e4dd'
+        }}>
+          <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#1a1a1a', marginTop: 0, marginBottom: '12px' }}>
+            Grown widely in Karnataka
+          </h3>
+          <p style={{ fontSize: '15px', color: '#555', lineHeight: '1.6', marginBottom: '20px' }}>
+            Our catalogue covers the state's main field crops — from rainfed ragi in the south to sugarcane and paddy in the irrigated belts.
+          </p>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            {['Ragi', 'Jowar', 'Paddy', 'Groundnut', 'Cotton', 'Tur', 'Bengal gram'].map(crop => (
+              <li key={crop} style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '10px', 
+                padding: '8px 0', 
+                fontSize: '15px', 
+                color: '#333' 
+              }}>
+                <span style={{ width: '8px', height: '8px', background: '#2d5016', borderRadius: '50%' }}></span>
+                {crop}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* --- RESULTS SECTION --- */}
       {hasSearched && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-            <h3 style={{ color: '#2d5016', margin: 0 }}>
-              {results.length > 0 ? `Top Recommendations (${results.length})` : 'No perfect matches found.'}
-            </h3>
+        <div style={{ marginTop: '40px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h2 style={{ fontSize: '28px', fontWeight: '700', color: '#1a1a1a', margin: 0 }}>
+              {results.length > 0 ? `Top Recommendations (${results.length})` : 'No perfect matches found'}
+            </h2>
             {results.length > 0 && (
-              <button onClick={handleSave} disabled={saving} style={{ background: '#1d4ed8', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+              <button 
+                onClick={handleSave} 
+                disabled={saving} 
+                style={{ 
+                  background: '#2d5016', 
+                  color: 'white', 
+                  border: 'none', 
+                  padding: '10px 20px', 
+                  borderRadius: '8px', 
+                  cursor: 'pointer', 
+                  fontWeight: '600',
+                  fontSize: '14px'
+                }}
+              >
                 {saving ? 'Saving...' : '💾 Save Lookup'}
               </button>
             )}
           </div>
           
-          {saveMsg && <p style={{ color: '#16a34a', fontWeight: 'bold', marginBottom: '15px' }}>{saveMsg}</p>}
+          {saveMsg && <p style={{ color: '#2d5016', fontWeight: '600', marginBottom: '20px' }}>{saveMsg}</p>}
 
-          {results.map((crop) => (
-            <div key={crop.id} onClick={() => setSelectedCrop(crop)} style={{ background: 'white', padding: '16px', borderRadius: '10px', marginBottom: '12px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', cursor: 'pointer', border: selectedCrop?.id === crop.id ? '2px solid #2d5016' : '1px solid #eee' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <h4 style={{ margin: 0, color: '#1f2d1f', fontSize: '18px' }}>{crop.name}</h4>
-                <span style={{ background: crop.score === 100 ? '#e8f3e0' : '#fff3cd', color: crop.score === 100 ? '#2d5016' : '#856404', padding: '4px 10px', borderRadius: '20px', fontWeight: 'bold', fontSize: '14px' }}>
-                  {crop.score}% Match
-                </span>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+            {results.map((crop) => (
+              <div 
+                key={crop.id} 
+                onClick={() => setSelectedCrop(crop)}
+                style={{ 
+                  background: 'white', 
+                  padding: '20px', 
+                  borderRadius: '12px', 
+                  border: selectedCrop?.id === crop.id ? '2px solid #2d5016' : '1px solid #eee',
+                  cursor: 'pointer',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <h4 style={{ margin: 0, color: '#1a1a1a', fontSize: '18px', fontWeight: '600' }}>{crop.name}</h4>
+                  <span style={{ 
+                    background: crop.score === 100 ? '#e8f3e0' : '#fff3cd', 
+                    color: crop.score === 100 ? '#2d5016' : '#856404', 
+                    padding: '4px 12px', 
+                    borderRadius: '20px', 
+                    fontWeight: '600',
+                    fontSize: '13px'
+                  }}>
+                    {crop.score}% Match
+                  </span>
+                </div>
+                <p style={{ margin: 0, fontSize: '14px', color: '#666', lineHeight: '1.5' }}>
+                  {crop.reasons.join(' • ')}
+                </p>
               </div>
-              <p style={{ margin: 0, fontSize: '14px', color: '#555' }}>{crop.reasons.join(' • ')}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
 
+      {/* --- CROP DETAIL --- */}
       {selectedCrop && (
-        <div style={{ background: '#f0f7f0', padding: '20px', borderRadius: '12px', marginTop: '20px', border: '1px solid #d0e8d0' }}>
-          <h3 style={{ color: '#2d5016', marginBottom: '15px' }}>Growing Guidance: {selectedCrop.name}</h3>
-          <div style={{ marginBottom: '12px' }}><strong style={{ fontSize: '14px', color: '#333' }}>Sowing Window:</strong><p style={{ margin: '4px 0 0 0', fontSize: '15px' }}>{selectedCrop.details.sowingWindow}</p></div>
-          <div style={{ marginBottom: '12px' }}><strong style={{ fontSize: '14px', color: '#333' }}>Water Needs:</strong><p style={{ margin: '4px 0 0 0', fontSize: '15px' }}>{selectedCrop.details.waterNeeds}</p></div>
-          <div style={{ marginBottom: '12px' }}><strong style={{ fontSize: '14px', color: '#333' }}>Duration:</strong><p style={{ margin: '4px 0 0 0', fontSize: '15px' }}>{selectedCrop.details.duration}</p></div>
-          <div><strong style={{ fontSize: '14px', color: '#333' }}>Key Tip:</strong><p style={{ margin: '4px 0 0 0', fontSize: '15px', fontStyle: 'italic' }}>{selectedCrop.details.tips}</p></div>
-          <button onClick={() => setSelectedCrop(null)} style={{ marginTop: '15px', background: '#666', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer' }}>Close Details</button>
+        <div style={{ 
+          background: '#f0f7f0', 
+          padding: '28px', 
+          borderRadius: '16px', 
+          marginTop: '30px', 
+          border: '1px solid #d0e8d0' 
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h3 style={{ color: '#2d5016', margin: 0, fontSize: '22px', fontWeight: '600' }}>
+              Growing Guidance: {selectedCrop.name}
+            </h3>
+            <button 
+              onClick={() => setSelectedCrop(null)} 
+              style={{ background: '#666', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}
+            >
+              Close
+            </button>
+          </div>
+          
+          <DetailRow label="Sowing Window" value={selectedCrop.details.sowingWindow} />
+          <DetailRow label="Water Needs" value={selectedCrop.details.waterNeeds} />
+          <DetailRow label="Duration" value={selectedCrop.details.duration} />
+          <DetailRow label="Key Tip" value={selectedCrop.details.tips} italic />
         </div>
       )}
     </div>
   )
 }
 
-const selectStyle = { width: '100%', padding: '12px', border: '1px solid #ccc', borderRadius: '8px', fontSize: '16px', background: 'white' }
-const buttonStyle = { width: '100%', padding: '14px', background: '#2d5016', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }
+function SectionTitle({ children }) {
+  return (
+    <h3 style={{ 
+      fontSize: '12px', 
+      fontWeight: '700', 
+      color: '#1a1a1a', 
+      letterSpacing: '1.5px', 
+      marginBottom: '12px',
+      textTransform: 'uppercase'
+    }}>
+      {children}
+    </h3>
+  )
+}
+
+function OptionButton({ selected, onClick, children }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        padding: '14px 12px',
+        background: selected ? '#f0f7f0' : 'white',
+        color: selected ? '#2d5016' : '#333',
+        border: selected ? '2px solid #2d5016' : '1px solid #ddd',
+        borderRadius: '10px',
+        fontSize: '14px',
+        fontWeight: selected ? '600' : '500',
+        cursor: 'pointer',
+        textAlign: 'center',
+        transition: 'all 0.2s',
+        minHeight: '50px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
+function DetailRow({ label, value, italic }) {
+  return (
+    <div style={{ marginBottom: '14px' }}>
+      <strong style={{ fontSize: '13px', color: '#666', textTransform: 'uppercase', letterSpacing: '1px' }}>{label}</strong>
+      <p style={{ margin: '6px 0 0 0', fontSize: '16px', color: '#1a1a1a', fontStyle: italic ? 'italic' : 'normal', lineHeight: '1.5' }}>
+        {value}
+      </p>
+    </div>
+  )
+}

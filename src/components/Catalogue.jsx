@@ -1,6 +1,5 @@
 import { useState } from 'react'
 
-// We put the data directly here to avoid any file import glitches
 const crops = [
   { id: 'paddy', name: 'Paddy (Rice)', soils: ['clay', 'loamy', 'laterite'], seasons: ['kharif', 'summer'], rainfall: ['medium', 'high'], water: ['limited irrigation', 'good irrigation'], details: { sowingWindow: 'June to July (Kharif), Jan to Feb (Summer)', waterNeeds: 'High - requires standing water in early stages', duration: '110 to 140 days', tips: 'Ensure proper field leveling for uniform water.' } },
   { id: 'ragi', name: 'Ragi (Finger Millet)', soils: ['red', 'loamy', 'black', 'laterite'], seasons: ['kharif', 'summer'], rainfall: ['low', 'medium'], water: ['rainfed only', 'limited irrigation'], details: { sowingWindow: 'June to July', waterNeeds: 'Low to Medium - highly drought tolerant', duration: '100 to 120 days', tips: 'Excellent for dryland farming. Do not let water stagnate.' } },
@@ -22,68 +21,75 @@ export default function Catalogue() {
   const [selectedCrop, setSelectedCrop] = useState(null)
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '10px' }}>
-      <h2 style={{ color: '#2d5016', marginBottom: '15px' }}>Crop Catalogue</h2>
-      <p style={{ color: '#666', marginBottom: '20px', fontSize: '14px' }}>
+    <div>
+      <p style={{ color: '#2d5016', fontSize: '13px', fontWeight: '600', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>
+        For farmers in Karnataka
+      </p>
+      <h1 style={{ fontSize: '40px', fontWeight: '700', color: '#1a1a1a', marginBottom: '8px' }}>Crop Catalogue</h1>
+      <p style={{ fontSize: '16px', color: '#666', marginBottom: '32px' }}>
         Tap on any crop below to see its growing requirements and tips.
       </p>
 
-      {/* List of all crops */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px' }}>
         {crops.map((crop) => (
           <div 
             key={crop.id} 
             onClick={() => setSelectedCrop(crop)}
             style={{ 
               background: 'white', 
-              padding: '16px', 
-              borderRadius: '10px', 
-              boxShadow: '0 1px 4px rgba(0,0,0,0.05)', 
+              padding: '24px 20px', 
+              borderRadius: '14px', 
+              border: selectedCrop?.id === crop.id ? '2px solid #2d5016' : '1px solid #eee',
               cursor: 'pointer', 
               textAlign: 'center',
-              border: '1px solid #eee',
-              transition: 'transform 0.1s'
+              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+              transition: 'all 0.2s'
             }}
           >
-            <h4 style={{ margin: 0, color: '#2d5016', fontSize: '16px' }}>{crop.name}</h4>
+            <h4 style={{ margin: 0, color: '#1a1a1a', fontSize: '16px', fontWeight: '600' }}>{crop.name}</h4>
           </div>
         ))}
       </div>
 
-      {/* Detail View when a crop is tapped */}
       {selectedCrop && (
-        <div style={{ background: '#f0f7f0', padding: '20px', borderRadius: '12px', marginTop: '20px', border: '1px solid #d0e8d0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-            <h3 style={{ color: '#2d5016', margin: 0 }}>Growing Guidance: {selectedCrop.name}</h3>
-            <button onClick={() => setSelectedCrop(null)} style={{ background: '#666', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}>Close</button>
+        <div style={{ 
+          background: '#f0f7f0', 
+          padding: '28px', 
+          borderRadius: '16px', 
+          marginTop: '30px', 
+          border: '1px solid #d0e8d0' 
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h3 style={{ color: '#2d5016', margin: 0, fontSize: '22px', fontWeight: '600' }}>
+              Growing Guidance: {selectedCrop.name}
+            </h3>
+            <button 
+              onClick={() => setSelectedCrop(null)} 
+              style={{ background: '#666', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}
+            >
+              Close
+            </button>
           </div>
           
-          <div style={{ marginBottom: '12px' }}>
-            <strong style={{ fontSize: '14px', color: '#333' }}>Best Soils:</strong>
-            <p style={{ margin: '4px 0 0 0', fontSize: '15px' }}>{selectedCrop.soils.join(', ')}</p>
-          </div>
-          <div style={{ marginBottom: '12px' }}>
-            <strong style={{ fontSize: '14px', color: '#333' }}>Seasons:</strong>
-            <p style={{ margin: '4px 0 0 0', fontSize: '15px' }}>{selectedCrop.seasons.join(', ')}</p>
-          </div>
-          <div style={{ marginBottom: '12px' }}>
-            <strong style={{ fontSize: '14px', color: '#333' }}>Sowing Window:</strong>
-            <p style={{ margin: '4px 0 0 0', fontSize: '15px' }}>{selectedCrop.details.sowingWindow}</p>
-          </div>
-          <div style={{ marginBottom: '12px' }}>
-            <strong style={{ fontSize: '14px', color: '#333' }}>Water Needs:</strong>
-            <p style={{ margin: '4px 0 0 0', fontSize: '15px' }}>{selectedCrop.details.waterNeeds}</p>
-          </div>
-          <div style={{ marginBottom: '12px' }}>
-            <strong style={{ fontSize: '14px', color: '#333' }}>Duration:</strong>
-            <p style={{ margin: '4px 0 0 0', fontSize: '15px' }}>{selectedCrop.details.duration}</p>
-          </div>
-          <div>
-            <strong style={{ fontSize: '14px', color: '#333' }}>Key Tip:</strong>
-            <p style={{ margin: '4px 0 0 0', fontSize: '15px', fontStyle: 'italic' }}>{selectedCrop.details.tips}</p>
-          </div>
+          <DetailRow label="Best Soils" value={selectedCrop.soils.join(', ')} />
+          <DetailRow label="Seasons" value={selectedCrop.seasons.join(', ')} />
+          <DetailRow label="Sowing Window" value={selectedCrop.details.sowingWindow} />
+          <DetailRow label="Water Needs" value={selectedCrop.details.waterNeeds} />
+          <DetailRow label="Duration" value={selectedCrop.details.duration} />
+          <DetailRow label="Key Tip" value={selectedCrop.details.tips} italic />
         </div>
       )}
+    </div>
+  )
+}
+
+function DetailRow({ label, value, italic }) {
+  return (
+    <div style={{ marginBottom: '14px' }}>
+      <strong style={{ fontSize: '13px', color: '#666', textTransform: 'uppercase', letterSpacing: '1px' }}>{label}</strong>
+      <p style={{ margin: '6px 0 0 0', fontSize: '16px', color: '#1a1a1a', fontStyle: italic ? 'italic' : 'normal', lineHeight: '1.5' }}>
+        {value}
+      </p>
     </div>
   )
 }
