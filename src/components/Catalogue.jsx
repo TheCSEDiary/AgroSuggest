@@ -1,95 +1,84 @@
 import { useState } from 'react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { crops } from '../data/crops'
+import CropDetailCard from './CropDetailCard'
 
-const crops = [
-  { id: 'paddy', name: 'Paddy (Rice)', soils: ['clay', 'loamy', 'laterite'], seasons: ['kharif', 'summer'], rainfall: ['medium', 'high'], water: ['limited irrigation', 'good irrigation'], details: { sowingWindow: 'June to July (Kharif), Jan to Feb (Summer)', waterNeeds: 'High - requires standing water in early stages', duration: '110 to 140 days', tips: 'Ensure proper field leveling for uniform water.' } },
-  { id: 'ragi', name: 'Ragi (Finger Millet)', soils: ['red', 'loamy', 'black', 'laterite'], seasons: ['kharif', 'summer'], rainfall: ['low', 'medium'], water: ['rainfed only', 'limited irrigation'], details: { sowingWindow: 'June to July', waterNeeds: 'Low to Medium - highly drought tolerant', duration: '100 to 120 days', tips: 'Excellent for dryland farming. Do not let water stagnate.' } },
-  { id: 'jowar', name: 'Jowar (Sorghum)', soils: ['black', 'red', 'loamy'], seasons: ['kharif', 'rabi'], rainfall: ['low', 'medium'], water: ['rainfed only', 'limited irrigation'], details: { sowingWindow: 'June to July (Kharif), Oct to Nov (Rabi)', waterNeeds: 'Low - very drought resistant', duration: '110 to 130 days', tips: 'Rabi jowar needs residual soil moisture.' } },
-  { id: 'maize', name: 'Maize (Corn)', soils: ['loamy', 'red', 'black'], seasons: ['kharif', 'rabi', 'summer'], rainfall: ['medium', 'high'], water: ['limited irrigation', 'good irrigation'], details: { sowingWindow: 'June to July (Kharif), Oct to Nov (Rabi)', waterNeeds: 'Medium to High', duration: '90 to 110 days', tips: 'Needs well-drained soil.' } },
-  { id: 'bajra', name: 'Bajra (Pearl Millet)', soils: ['sandy', 'loamy', 'red'], seasons: ['kharif', 'rabi'], rainfall: ['low'], water: ['rainfed only'], details: { sowingWindow: 'June to July', waterNeeds: 'Very Low', duration: '80 to 100 days', tips: 'Best suited for sandy soils. Avoid waterlogging.' } },
-  { id: 'groundnut', name: 'Groundnut', soils: ['sandy', 'loamy', 'red', 'laterite'], seasons: ['kharif', 'rabi', 'summer'], rainfall: ['low', 'medium'], water: ['rainfed only', 'limited irrigation'], details: { sowingWindow: 'June to July (Kharif), Dec to Jan (Summer)', waterNeeds: 'Low to Medium', duration: '110 to 130 days', tips: 'Apply gypsum at flowering to improve pod filling.' } },
-  { id: 'sunflower', name: 'Sunflower', soils: ['black', 'red', 'loamy'], seasons: ['kharif', 'rabi'], rainfall: ['low', 'medium'], water: ['rainfed only', 'limited irrigation'], details: { sowingWindow: 'June to July (Kharif), Oct to Nov (Rabi)', waterNeeds: 'Medium', duration: '90 to 110 days', tips: 'Keep bees nearby for better pollination.' } },
-  { id: 'sugarcane', name: 'Sugarcane', soils: ['clay', 'loamy', 'black', 'red'], seasons: ['kharif', 'summer'], rainfall: ['high'], water: ['good irrigation'], details: { sowingWindow: 'Jan to Feb (Spring), June to July (Autumn)', waterNeeds: 'Very High', duration: '12 to 18 months', tips: 'Earthing up is crucial to prevent lodging.' } },
-  { id: 'cotton', name: 'Cotton', soils: ['black', 'red', 'loamy'], seasons: ['kharif'], rainfall: ['medium'], water: ['limited irrigation', 'good irrigation'], details: { sowingWindow: 'April to May', waterNeeds: 'Medium', duration: '150 to 180 days', tips: 'Monitor closely for bollworms.' } },
-  { id: 'tur', name: 'Tur (Pigeon Pea)', soils: ['red', 'black', 'loamy', 'laterite'], seasons: ['kharif', 'rabi'], rainfall: ['low', 'medium'], water: ['rainfed only', 'limited irrigation'], details: { sowingWindow: 'June to July (Kharif), Sept to Oct (Rabi)', waterNeeds: 'Low', duration: '150 to 180 days', tips: 'Prune the top 10cm after 45 days to encourage branching.' } },
-  { id: 'bengal-gram', name: 'Bengal Gram (Chickpea)', soils: ['black', 'loamy', 'red'], seasons: ['rabi'], rainfall: ['low'], water: ['rainfed only', 'limited irrigation'], details: { sowingWindow: 'October to November', waterNeeds: 'Low', duration: '100 to 120 days', tips: 'Treat seeds with Rhizobium culture before sowing.' } },
-  { id: 'horse-gram', name: 'Horse Gram', soils: ['red', 'laterite', 'sandy'], seasons: ['rabi', 'summer'], rainfall: ['low'], water: ['rainfed only'], details: { sowingWindow: 'October to November (Rabi), Feb to March (Summer)', waterNeeds: 'Very Low', duration: '90 to 120 days', tips: 'Excellent catch crop. Requires almost no fertilizer.' } },
-  { id: 'sesame', name: 'Sesame (Gingelly)', soils: ['sandy', 'loamy', 'red', 'laterite'], seasons: ['kharif', 'rabi', 'summer'], rainfall: ['low', 'medium'], water: ['rainfed only', 'limited irrigation'], details: { sowingWindow: 'June to July (Kharif), Feb to March (Summer)', waterNeeds: 'Low', duration: '90 to 110 days', tips: 'Sow in ridges to prevent water stagnation.' } },
-  { id: 'mustard', name: 'Mustard', soils: ['loamy', 'red', 'sandy'], seasons: ['rabi'], rainfall: ['low', 'medium'], water: ['rainfed only', 'limited irrigation'], details: { sowingWindow: 'October to November', waterNeeds: 'Low to Medium', duration: '110 to 130 days', tips: 'Light irrigation at branching boosts seed yield.' } }
-]
+const categories = ['Field Crops', 'Vegetables', 'Fruits', 'Plantation Crops', 'Flowers & Spices']
 
 export default function Catalogue() {
   const [selectedCrop, setSelectedCrop] = useState(null)
 
+  const getChartData = (crop) => {
+    const sameCategory = crops.filter(c => c.category === crop.category && c.id !== crop.id).slice(0, 4)
+    return [
+      { name: crop.name.split(' ')[0], water: crop.waterScore, fill: '#059669' },
+      ...sameCategory.map(c => ({ name: c.name.split(' ')[0], water: c.waterScore, fill: '#d1d5db' }))
+    ]
+  }
+
   return (
     <div>
-      <p style={{ color: '#2d5016', fontSize: '13px', fontWeight: '600', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>
-        For farmers in Karnataka
+      <p style={{ color: '#059669', fontSize: '13px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '12px' }}>
+        FOR FARMERS IN KARNATAKA
       </p>
-      <h1 style={{ fontSize: '40px', fontWeight: '700', color: '#1a1a1a', marginBottom: '8px' }}>Crop Catalogue</h1>
-      <p style={{ fontSize: '16px', color: '#666', marginBottom: '32px' }}>
-        Tap on any crop below to see its growing requirements and tips.
+      <h1 style={{ fontSize: '48px', fontWeight: '700', color: '#111827', marginBottom: '8px', lineHeight: '1.1' }}>Crop Catalogue</h1>
+      <p style={{ fontSize: '18px', color: '#4b5563', marginBottom: '40px', maxWidth: '600px', lineHeight: '1.6' }}>
+        Browse our comprehensive guide. Tap on any crop below to see its growing requirements and data analysis.
       </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px' }}>
-        {crops.map((crop) => (
-          <div 
-            key={crop.id} 
-            onClick={() => setSelectedCrop(crop)}
-            style={{ 
-              background: 'white', 
-              padding: '24px 20px', 
-              borderRadius: '14px', 
-              border: selectedCrop?.id === crop.id ? '2px solid #2d5016' : '1px solid #eee',
-              cursor: 'pointer', 
-              textAlign: 'center',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-              transition: 'all 0.2s'
-            }}
-          >
-            <h4 style={{ margin: 0, color: '#1a1a1a', fontSize: '16px', fontWeight: '600' }}>{crop.name}</h4>
+      {categories.map((category) => {
+        const categoryCrops = crops.filter(crop => crop.category === category)
+        
+        return (
+          <div key={category} style={{ marginBottom: '50px' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#111827', marginBottom: '20px', paddingBottom: '10px', borderBottom: '2px solid #e5e7eb' }}>
+              {category}
+            </h2>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px' }}>
+              {categoryCrops.map((crop) => (
+                <div 
+                  key={crop.id} 
+                  onClick={() => setSelectedCrop(crop)}
+                  style={{ 
+                    background: 'white', padding: '24px 20px', borderRadius: '12px', 
+                    border: selectedCrop?.id === crop.id ? '2px solid #059669' : '1px solid #e5e7eb',
+                    cursor: 'pointer', textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', transition: 'all 0.2s'
+                  }}
+                >
+                  <h4 style={{ margin: 0, color: '#111827', fontSize: '16px', fontWeight: '600' }}>{crop.name}</h4>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
+        )
+      })}
 
       {selectedCrop && (
-        <div style={{ 
-          background: '#f0f7f0', 
-          padding: '28px', 
-          borderRadius: '16px', 
-          marginTop: '30px', 
-          border: '1px solid #d0e8d0' 
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h3 style={{ color: '#2d5016', margin: 0, fontSize: '22px', fontWeight: '600' }}>
-              Growing Guidance: {selectedCrop.name}
-            </h3>
-            <button 
-              onClick={() => setSelectedCrop(null)} 
-              style={{ background: '#666', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px' }}
-            >
-              Close
-            </button>
+        <CropDetailCard crop={selectedCrop} onClose={() => setSelectedCrop(null)} context="Crop Catalogue">
+          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e5e7eb' }}>
+            <h4 style={{ margin: '0 0 20px 0', fontSize: '16px', fontWeight: '600', color: '#111827' }}>
+              💧 Relative Water Requirement Analysis
+            </h4>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={getChartData(selectedCrop)}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} cursor={{ fill: 'transparent' }} />
+                <Bar dataKey="water" radius={[4, 4, 0, 0]}>
+                  {getChartData(selectedCrop).map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+            <p style={{ fontSize: '12px', color: '#6b7280', textAlign: 'center', marginTop: '10px' }}>
+              Comparison of water needs (Higher score = More water needed)
+            </p>
           </div>
-          
-          <DetailRow label="Best Soils" value={selectedCrop.soils.join(', ')} />
-          <DetailRow label="Seasons" value={selectedCrop.seasons.join(', ')} />
-          <DetailRow label="Sowing Window" value={selectedCrop.details.sowingWindow} />
-          <DetailRow label="Water Needs" value={selectedCrop.details.waterNeeds} />
-          <DetailRow label="Duration" value={selectedCrop.details.duration} />
-          <DetailRow label="Key Tip" value={selectedCrop.details.tips} italic />
-        </div>
+        </CropDetailCard>
       )}
-    </div>
-  )
-}
-
-function DetailRow({ label, value, italic }) {
-  return (
-    <div style={{ marginBottom: '14px' }}>
-      <strong style={{ fontSize: '13px', color: '#666', textTransform: 'uppercase', letterSpacing: '1px' }}>{label}</strong>
-      <p style={{ margin: '6px 0 0 0', fontSize: '16px', color: '#1a1a1a', fontStyle: italic ? 'italic' : 'normal', lineHeight: '1.5' }}>
-        {value}
-      </p>
     </div>
   )
 }
